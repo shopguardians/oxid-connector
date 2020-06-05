@@ -1,5 +1,5 @@
 {
-  "name": "shopguardians/connector",
+  "name": "shopguardians/oxid-connector",
   "description": "OXID Plugin for Shopguardians",
   "type": "oxideshop-module",
   "authors": [
