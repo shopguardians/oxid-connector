@@ -1,0 +1,23 @@
+{
+  "name": "shopguardians/connector",
+  "description": "OXID Plugin for Shopguardians",
+  "type": "oxideshop-module",
+  "authors": [
+    {
+      "name": "Shopguardians",
+      "email": "oxidmodule@active-value.de"
+    }
+  ],
+  "minimum-stability": "stable",
+  "require": {},
+  "extra": {
+    "oxideshop": {
+      "target-directory": "av/Shopguardians"
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "ActiveValue\\Shopguardians\\": "../../../source/modules/av/Shopguardians"
+    }
+  }
+}
