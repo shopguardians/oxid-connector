@@ -101,9 +101,9 @@ class OrderHeuristic
      * @return false|string
      * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
      */
-    public function getAverageMinutesBetweenOrders()
+    public function getAverageMinutesBetweenOrdersByWeekday()
     {
-        return OrderRepository::getAverageMinutesBetweenOrdersInDateRange($this->startDayLastMonth, $this->endDayLastMonth) ?? $this->averageOrderDistanceMinutesFallback;
+        return OrderRepository::getAvgMinutesBetweenOrdersInDateRangeByWeekday($this->startDayLastMonth, $this->endDayLastMonth);
     }
 
     /**
@@ -114,23 +114,36 @@ class OrderHeuristic
      * @return false|int|string
      * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
      */
-    public function getAverageMinutesBetweenOrdersForPaymentType($paymentType)
+    public function getAverageMinutesBetweenOrdersForPaymentTypeByWeekday($paymentType)
     {
-        return OrderRepository::getAverageMinutesBetweenOrdersInDateRange($this->startDayLastMonth, $this->endDayLastMonth, $paymentType) ?? null;
+        return OrderRepository::getAvgMinutesBetweenOrdersInDateRangeByWeekday($this->startDayLastMonth, $this->endDayLastMonth, $paymentType) ?? null;
     }
 
     /**
      * Returns the assumed timerange in minutes where a order should happen
      * otherwise alert would be raised
      *
-     * @return false|float
+     * @return false|float[]
      * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
      */
-    public function getAssumedOrderDistance()
+    public function getOrderDistancesByWeekday()
     {
-        $averageOrderDistanceMinutes = $this->getAverageMinutesBetweenOrders();
+        $averagesByWeekday = $this->getAverageMinutesBetweenOrdersByWeekday();
 
-        return round($averageOrderDistanceMinutes * $this->alertMinutesSafetyBufferFactor);
+        $distances = [];
+
+        foreach ($averagesByWeekday as $oneAverage) {
+
+            $oneAverage['avgMinutes'] = $oneAverage['avgMinutes'] > 0 ? $oneAverage['avgMinutes'] : $this->averageOrderDistanceMinutesFallback;
+
+            $distances[] = [
+                'weekday' => (int) $oneAverage['weekdayNumber'],
+                'tresholdMinutes' => round($oneAverage['avgMinutes'] * $this->alertMinutesSafetyBufferFactor),
+                'actualMinutes' => round($oneAverage['avgMinutes'])
+            ];
+        }
+
+        return $distances;
     }
 
     /**
@@ -145,15 +158,32 @@ class OrderHeuristic
      * @return array
      * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
      */
-    public function getAssumedOrderDistanceByPaymentMethods($paymentMethods)
+    public function getOrderDistancesByWeekdayAndPaymentMethods($paymentMethods)
     {
         $distances = [];
 
+        if (empty($paymentMethods)) {
+            return $distances;
+        }
+
         foreach ($paymentMethods as $paymentMethod) {
+
+            $averagesByWeekday = $this->getAverageMinutesBetweenOrdersForPaymentTypeByWeekday($paymentMethod['paymenttype']);
+
+            foreach ($averagesByWeekday as &$oneAverage) {
+
+                $oneAverage['avgMinutes'] = $oneAverage['avgMinutes'] > 0 ? $oneAverage['avgMinutes'] : $this->averageOrderDistanceMinutesFallback;
+
+                $oneAverage['actualMinutes']    = round($oneAverage['avgMinutes']);
+                $oneAverage['tresholdMinutes']  = round($oneAverage['avgMinutes'] * $this->alertMinutesSafetyBufferFactor);
+                unset($oneAverage['avgMinutes']);
+            }
+
             $distances[] = [
-                'minutes' => round($this->getAverageMinutesBetweenOrdersForPaymentType($paymentMethod['paymenttype']) * $this->alertMinutesSafetyBufferFactor),
                 'paymenttype' => $paymentMethod['paymenttype'],
-                'description' => $paymentMethod['description']
+                'description' => $paymentMethod['description'],
+                'byWeekdays' => $averagesByWeekday
+
             ];
         }
 

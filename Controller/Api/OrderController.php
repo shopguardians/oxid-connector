@@ -56,8 +56,8 @@ class OrderController extends BaseController
 
         return $this->renderJson([
             'usualWorkingHours' => $orderHeuristic->getUsualWorkingHours(),
-            'assumedOrderDistanceMinutes' => $orderHeuristic->getAssumedOrderDistance(),
-            'assumedOrderDistanceByPaymentMethods' => $orderHeuristic->getAssumedOrderDistanceByPaymentMethods($paymentMethods)
+            'averageOrderDistancesByWeekday' => $orderHeuristic->getOrderDistancesByWeekday(),
+            'averageOrderDistancesByWeekdayAndPaymentMethods' => $orderHeuristic->getOrderDistancesByWeekdayAndPaymentMethods($paymentMethods)
         ]);
     }
 

@@ -28,7 +28,7 @@ FROM oxorder
       GROUP BY HOUR(OXORDERDATE)
     ) nested;";
 
-        $avgCount = DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_NUM)->getOne($query, [1]);
+        $avgCount = DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_NUM)->getOne($query);
         if (!$avgCount) {
             return 0;
         }
@@ -55,7 +55,7 @@ GROUP BY HOUR(OXORDERDATE)";
     }
 
     /**
-     * Get average distance in minutes between to orders
+     * Get average distance in minutes between orders by weekday
      * Can optionally specify an OXPAYMENTTYPE
      *
      * @param $fromDate
@@ -64,13 +64,15 @@ GROUP BY HOUR(OXORDERDATE)";
      * @return false|string
      * @throws \OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
      */
-    public static function getAverageMinutesBetweenOrdersInDateRange($fromDate, $toDate, $paymentMethod=null)
+    public static function getAvgMinutesBetweenOrdersInDateRangeByWeekday($fromDate, $toDate, $paymentMethod=null)
     {
         $query = "SELECT TIMESTAMPDIFF(MINUTE, MIN(oxorderdate), MAX(oxorderdate) ) 
        /
-       (COUNT(DISTINCT(oxorderdate)) -1) 
+       (COUNT(DISTINCT(oxorderdate)) -1) AS avgMinutes, WEEKDAY(OXORDERDATE) AS weekdayNumber
 FROM oxorder
-WHERE OXORDERDATE >= ? AND OXORDERDATE <= ?";
+WHERE OXORDERDATE >= ? AND OXORDERDATE <= ?
+
+GROUP BY WEEKDAY(OXORDERDATE)";
 
         $params = [$fromDate, $toDate];
 
@@ -79,7 +81,7 @@ WHERE OXORDERDATE >= ? AND OXORDERDATE <= ?";
             $params[] = $paymentMethod;
         }
 
-        return DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_NUM)->getOne($query, $params);
+        return DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_ASSOC)->getAll($query, $params);
     }
 
     /**
@@ -137,7 +139,7 @@ GROUP BY oxpaymenttype";
         $query = "SELECT o.oxpaymenttype AS paymenttype,p.OXDESC AS description from oxorder o
 
 left join oxpayments p ON p.OXID=o.oxpaymenttype
-where p.OXACTIVE = 1 AND o.OXORDERDATE >= NOW() - INTERVAL 120 DAY
+where p.OXACTIVE = 1 AND o.OXORDERDATE >= NOW() - INTERVAL ? DAY
 group by o.oxpaymenttype";
 
         return DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_ASSOC)->getAll($query, [$lastDays]) ?? null;
