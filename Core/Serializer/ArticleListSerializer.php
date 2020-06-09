@@ -4,7 +4,7 @@ namespace ActiveValue\Shopguardians\Core\Serializer;
 
 use OxidEsales\Eshop\Core\Registry;
 
-class ArticleListSerializer
+class ArticleListSerializer extends BaseSerializer
 {
     /**
      * Turn this item object into a generic array
@@ -31,18 +31,6 @@ class ArticleListSerializer
         return $serialized;
     }
 
-    /**
-     * Returns full url to article
-     *
-     * @param $article
-     * @return string
-     */
-    public static function getDetailUrl($article)
-    {
-        if (empty($article['seoLink'])) return null;
-        $sFullUrl =  Registry::getConfig()->getShopUrl() . $article['seoLink'];
-        return \OxidEsales\Eshop\Core\Registry::getUtilsUrl()->processSeoUrl($sFullUrl);
-    }
 
     /**
      * Return thumbnail url for first article picture

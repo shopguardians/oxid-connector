@@ -21,7 +21,7 @@ $aModule = [
     'title'       => '<span style="color: #706f6f;">SHOP</span><span style="color: #000;"><strong>GUARDIANS</strong></span> Connector',
     'description' => 'Shopguardians connector',
     'thumbnail'   => 'img.png',
-    'version'     => '1.0.3',
+    'version'     => '1.0.4',
     'author'      => 'active value GmbH',
     'url'         => 'http://active-value.de',
     'email'       => 'oxidmodule@active-value.de',
@@ -35,7 +35,8 @@ $aModule = [
         'av_shopguardians_security' => \ActiveValue\Shopguardians\Controller\Api\SecurityController::class,
         'av_shopguardians_articles' => \ActiveValue\Shopguardians\Controller\Api\ArticleController::class,
         'av_shopguardians_orders' => \ActiveValue\Shopguardians\Controller\Api\OrderController::class,
-        'av_shopguardians_customers' => \ActiveValue\Shopguardians\Controller\Api\CustomerController::class
+        'av_shopguardians_customers' => \ActiveValue\Shopguardians\Controller\Api\CustomerController::class,
+        'av_shopguardians_categories' => \ActiveValue\Shopguardians\Controller\Api\CategoryController::class
     ],
     'templates'   => [
     ],
