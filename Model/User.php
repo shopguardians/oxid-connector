@@ -28,7 +28,37 @@ class User extends User_parent
      */
     public function getNewUserCount()
     {
-        return $this->getUserCount('AND DATE(OXCREATE) = CURDATE()');
+        return $this->getUserCount("AND OXPASSWORD <> '' AND DATE(OXCREATE) = CURDATE()");
+    }
+
+    /**
+     * Returns number of users that registered in total
+     *
+     * @return int
+     */
+    public function getUserCountTotal()
+    {
+        return $this->getUserCount("AND OXPASSWORD <> ''");
+    }
+
+    /**
+     * Returns number of total guest users
+     *
+     * @return int
+     */
+    public function getNewGuestUserCount()
+    {
+        return $this->getUserCount("AND OXPASSWORD = '' AND DATE(OXCREATE) = CURDATE()");
+    }
+
+    /**
+     * Returns number of total guest users
+     *
+     * @return int
+     */
+    public function getGuestUserCount()
+    {
+        return $this->getUserCount("AND OXPASSWORD = ''");
     }
 
     /**
@@ -37,10 +67,25 @@ class User extends User_parent
      * @return int
      * @throws ConnectionException
      */
-    public function getNewSubscriberCount()
+    public function getNewsletterSubscriberCountToday()
     {
         $oDb = DatabaseProvider::getDb();
         $sQ = "select count(*) from oxnewssubscribed where oxshopid = '" . $this->getConfig()->getShopId() . "' AND DATE(OXSUBSCRIBED) = CURDATE() AND OXDBOPTIN = 1";
+        $iCnt = (int) $oDb->getOne($sQ);
+
+        return $iCnt;
+    }
+
+    /**
+     * Returns number of total newsletter subscribers
+     *
+     * @return int
+     * @throws ConnectionException
+     */
+    public function getNewsletterSubscriberCount()
+    {
+        $oDb = DatabaseProvider::getDb();
+        $sQ = "select count(*) from oxnewssubscribed where oxshopid = '" . $this->getConfig()->getShopId() . "' AND OXDBOPTIN = 1";
         $iCnt = (int) $oDb->getOne($sQ);
 
         return $iCnt;

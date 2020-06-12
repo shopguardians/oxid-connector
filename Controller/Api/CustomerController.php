@@ -28,9 +28,12 @@ class CustomerController extends BaseController
         $oUser = oxNew(User::class);
 
         $kpi = [
-            'customers_total'       => $oUser->getUserCount(),
+            'customers_total'       => $oUser->getUserCountTotal(),
             'customers_today'       => $oUser->getNewUserCount(),
-            'newsletter_today'      => $oUser->getNewSubscriberCount()
+            'guests_total'          => $oUser->getGuestUserCount(),
+            'guests_today'          => $oUser->getNewGuestUserCount(),
+            'newsletter_total'      => $oUser->getNewsletterSubscriberCount(),
+            'newsletter_today'      => $oUser->getNewsletterSubscriberCountToday(),
         ];
 
         return $this->renderJson($kpi);
