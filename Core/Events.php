@@ -54,4 +54,19 @@ class Events
 
         Registry::getConfig()->saveShopConfVar('str', 'AVSHOPGUARDIANS_API_KEY', $randomKey, null, 'module:AvShopguardians');
     }
+
+    /**
+     * Returns version from metadata.php
+     *
+     * @return string|null
+     */
+    public static function getModuleVersion()
+    {
+        $oModule = oxNew(\OxidEsales\Eshop\Core\Module\Module::class);
+        $oModule->load('AvShopguardians');
+
+        return $oModule ? $oModule->getInfo('version') : null;
+
+
+    }
 }
