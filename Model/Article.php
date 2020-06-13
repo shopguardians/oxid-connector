@@ -42,6 +42,10 @@ class Article extends Article_parent
      */
     public function getManufacturerName()
     {
+        if (!$this->oxarticles__oxmanufacturerid->value) {
+            return null;
+        }
+
         $oManufacturer = $this->getManufacturer();
 
         if ($oManufacturer instanceof Manufacturer) {

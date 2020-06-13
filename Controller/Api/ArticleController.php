@@ -4,11 +4,13 @@ namespace ActiveValue\Shopguardians\Controller\Api;
 
 use ActiveValue\Shopguardians\Core\Events;
 use ActiveValue\Shopguardians\Core\ResponseHelper;
+use ActiveValue\Shopguardians\Core\Serializer\ArticleArraySerializer;
 use ActiveValue\Shopguardians\Core\Serializer\ArticleListSerializer;
 use ActiveValue\Shopguardians\Core\Serializer\ArticleSerializer;
 use ActiveValue\Shopguardians\Core\Utils\PaginationUtils;
 use ActiveValue\Shopguardians\Repositories\ArticleRepository;
 use OxidEsales\Eshop\Application\Model\Article;
+use OxidEsales\Eshop\Application\Model\ArticleList;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\SystemComponentException;
 use OxidEsales\Eshop\Core\Registry;
@@ -47,8 +49,33 @@ class ArticleController extends BaseController
     }
 
     /**
-     * Returns articles without category association
+     * Returns all parent articles
      *
+     */
+    public function getArticlesForDataQuality()
+    {
+        $this->setPaginationParamsFromRequest();
+
+        $articleList    = oxNew(ArticleList::class);
+        $article        = oxNew(Article::class);
+
+        $articleList->setSqlLimit($this->pagination->getOffset(), $this->pagination->getPerPage());
+        $articleList->selectString($article->buildSelectString(['OXPARENTID' => '']));
+
+        $articleListSerializer = oxNew(ArticleListSerializer::class);
+
+        $output = ['result' => $articleListSerializer->transform($articleList)];
+
+        if ($this->pagination) {
+            $output['pagination'] = $this->pagination->getData();
+        }
+
+        return $this->renderJson($output);
+
+    }
+
+    /**
+     * Returns articles without category association
      *
      * @return bool|mixed
      */
@@ -243,7 +270,7 @@ LIMIT {$this->pagination->getOffset()},{$this->pagination->getPerPage()}";
             ResponseHelper::internalServerError($e->getMessage());
         }
 
-        $output = ['result' => ArticleListSerializer::transform($aArticles)];
+        $output = ['result' => ArticleArraySerializer::transform($aArticles)];
 
         if ($this->pagination) {
             $output['pagination'] = $this->pagination->getData();
