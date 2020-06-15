@@ -21,7 +21,7 @@ $aModule = [
     'title'       => '<span style="color: #706f6f;">SHOP</span><span style="color: #000;"><strong>GUARDIANS</strong></span> Connector',
     'description' => 'Shopguardians connector',
     'thumbnail'   => 'img.png',
-    'version'     => '1.0.6',
+    'version'     => '1.0.7',
     'author'      => 'active value GmbH',
     'url'         => 'http://active-value.de',
     'email'       => 'oxidmodule@active-value.de',
