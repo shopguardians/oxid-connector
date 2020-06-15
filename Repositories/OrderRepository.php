@@ -71,8 +71,7 @@ GROUP BY HOUR(OXORDERDATE)";
        (COUNT(DISTINCT(oxorderdate)) -1) AS avgMinutes, WEEKDAY(OXORDERDATE) AS weekdayNumber
 FROM oxorder
 WHERE OXORDERDATE >= ? AND OXORDERDATE <= ?
-
-GROUP BY WEEKDAY(OXORDERDATE)";
+";
 
         $params = [$fromDate, $toDate];
 
@@ -80,6 +79,8 @@ GROUP BY WEEKDAY(OXORDERDATE)";
             $query .= ' AND OXPAYMENTTYPE = ?';
             $params[] = $paymentMethod;
         }
+
+        $query .= ' GROUP BY WEEKDAY(OXORDERDATE)';
 
         return DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_ASSOC)->getAll($query, $params);
     }
