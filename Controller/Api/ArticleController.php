@@ -59,12 +59,16 @@ class ArticleController extends BaseController
         $articleList    = oxNew(ArticleList::class);
         $article        = oxNew(Article::class);
 
+
+        $this->pagination->setPagesCountFromTotalCount(ArticleRepository::getArticleCountForDataQuality());
+
         $articleList->setSqlLimit($this->pagination->getOffset(), $this->pagination->getPerPage());
         $articleList->selectString($article->buildSelectString(['OXPARENTID' => '']));
 
         $articleListSerializer = oxNew(ArticleListSerializer::class);
+        
+        $output = ['articles' => $articleListSerializer->transform($articleList)];
 
-        $output = ['result' => $articleListSerializer->transform($articleList)];
 
         if ($this->pagination) {
             $output['pagination'] = $this->pagination->getData();
