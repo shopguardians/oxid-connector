@@ -2,6 +2,7 @@
 
 namespace ActiveValue\Shopguardians\Core\Serializer;
 
+use ActiveValue\Shopguardians\Core\Events;
 use OxidEsales\Eshop\Application\Model\Article;
 use OxidEsales\Eshop\Application\Model\ArticleList;
 use OxidEsales\Eshop\Application\Model\Category;
@@ -38,11 +39,14 @@ class ArticleListSerializer extends BaseSerializer
      */
     protected $pictureHandler;
 
+    protected $viewNameGenerator;
+
     public function __construct()
     {
         $this->pictureCount     = Registry::getConfig()->getConfigParam('iPicCount');
         $this->thumbnailSize    = Registry::getConfig()->getConfigParam('sThumbnailsize');
         $this->pictureHandler   = Registry::getPictureHandler();
+        $this->viewNameGenerator = Registry::get(\OxidEsales\Eshop\Core\TableViewNameGenerator::class);
     }
 
     /**
@@ -56,39 +60,55 @@ class ArticleListSerializer extends BaseSerializer
         $serialized = [];
 
         foreach ($articles as $article) {
-            /** @var Article $article */
 
             $articlePictures = $this->serializeArticlePictures($article);
 
-            $serialized[] = [
-                'product_uid'          => $article->oxarticles__oxid->value,
+            $serializedFields = [
+                'productUid'          => $article->oxarticles__oxid->value,
                 'stock'                => (int) $article->oxarticles__oxstock->value,
                 'price'                => money_format('%.2n', $article->getPrice()->getBruttoPrice()),
                 'vat'                  => $article->getArticleVat(),
-                'imageUrl'             => $article->getMasterZoomPictureUrl(1),
-                'description'          => $article->getShortDescription(),
-                'keywords'             => $article->oxarticles__oxsearchkeys->value,
                 'rating'               => $article->oxarticles__oxrating->value,
-                'title'                => $article->oxarticles__oxtitle->value,
-                'brand'                => $article->getManufacturerName(),
                 'active'               => $article->oxarticles__oxactive->value,
-                'description_full'     => $this->sanitizeDescription($article->getLongDesc()),
-                'parent'               => $article->oxarticles__oxvarcount->value > 0 ? true : false,
+                'hasVariants'         => $article->oxarticles__oxvarcount->value > 0 ? true : false,
                 'buyable'              => $article->isBuyable(),
                 //'variant_keys'         => $article->getVariantKeys(),
                 'priceNet'             => money_format('%.2n', $article->getPrice()->getNettoPrice()),
                 'artnum'               => $article->oxarticles__oxartnum->value,
-                'url'                  => $article->getLink(),
-                'sold_amount'          => $article->oxarticles__oxsoldamount->value,
-                'parent_id'            => $article->oxarticles__oxparentid->value,
+                'url'                  => [$article->getLink()],
+                'soldAmount'          => $article->oxarticles__oxsoldamount->value,
+                'parentUid'            => $article->oxarticles__oxparentid->value,
                 'thumb'                => $article->getThumbnailUrl(),
                 'pictures'             => $articlePictures,
-                'pictures_count'       => count($articlePictures),
-                'category_main'        => $this->getCategoryName($article),
-                'category_count'       => $article->getCategoryIds(),
-                'manufacturer'         => $article->getManufacturer(),
-                'vendor'               => $article->getVendor()
+                'pictureCount'       => count($articlePictures)
             ];
+
+            // Multi language handling
+            $languages = Events::getActiveLanguages();
+
+
+            foreach ($languages as $languageCode=>$language) {
+                if ($language['baseId'] !== 0) {
+                    $article = oxNew(Article::class);
+                    $article->loadInLang($language['baseId'], $article->getId());
+                }
+
+                $serializedFields['title'][$languageCode] = $article->getTitle();
+                $serializedFields['fullDescription'][$languageCode] = $this->sanitizeDescription($article->getLongDesc());
+                $serializedFields['mainCategory'][$languageCode] = $this->getCategoryName($article);
+                $serializedFields['categories'][$languageCode] = $article->getCategoryIds(); // TODO: Change to names instead of ids
+                $serializedFields['manufacturer'][$languageCode] = $article->getManufacturer();
+                $serializedFields['vendor'][$languageCode] = $article->getVendor();
+                $serializedFields['shortDescription'][$languageCode] = $article->getCoreFieldInLanguage('oxshortdesc', $language['baseId']);
+                $serializedFields['keywords'][$languageCode] = $article->getCoreFieldInLanguage('oxsearchkeys', $language['baseId']);
+                $serializedFields['brand'][$languageCode] = $article->getManufacturername();
+                $serializedFields['url'][$languageCode] = $article->getLink();
+            }
+
+
+            $serialized[] = $serializedFields;
+
+
         }
 
         return $serialized;

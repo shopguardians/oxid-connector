@@ -102,4 +102,19 @@ class Article extends Article_parent
         return $aVariantSelections;
 
     }
+
+    public function getCoreFieldInLanguage($field, $languageId)
+    {
+        $key = "oxarticles__{$field}_{$languageId}";
+
+        if ($languageId === 0) {
+            $key = "oxarticles__{$field}";
+        }
+
+        if (!$this->{$key}) {
+            return null;
+        }
+
+        return $this->{$key}->value;
+    }
 }

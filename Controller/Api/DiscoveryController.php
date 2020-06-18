@@ -24,11 +24,7 @@ class DiscoveryController extends BaseController
     {
         $pluginVersion = Events::getModuleVersion();
 
-        $languages =  Registry::getConfig()->getConfigParam('aLanguageParams');
-
-        $languages = array_filter($languages, function($languageArray) {
-           return $languageArray['active'] == 1;
-        });
+        $languages =  Events::getActiveLanguages();
 
         $this->renderJson([
             'pluginVersion' => $pluginVersion,

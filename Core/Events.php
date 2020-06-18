@@ -67,6 +67,14 @@ class Events
 
         return $oModule ? $oModule->getInfo('version') : null;
 
+    }
 
+    public static function getActiveLanguages()
+    {
+        $languages =  Registry::getConfig()->getConfigParam('aLanguageParams');
+
+        return array_filter($languages, function($languageArray) {
+            return $languageArray['active'] == 1;
+        });
     }
 }
