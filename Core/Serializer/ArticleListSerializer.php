@@ -64,23 +64,22 @@ class ArticleListSerializer extends BaseSerializer
             $articlePictures = $this->serializeArticlePictures($article);
 
             $serializedFields = [
-                'productUid'          => $article->oxarticles__oxid->value,
-                'stock'                => (int) $article->oxarticles__oxstock->value,
-                'price'                => money_format('%.2n', $article->getPrice()->getBruttoPrice()),
-                'vat'                  => $article->getArticleVat(),
-                'rating'               => $article->oxarticles__oxrating->value,
-                'active'               => $article->oxarticles__oxactive->value,
-                'hasVariants'         => $article->oxarticles__oxvarcount->value > 0 ? true : false,
-                'buyable'              => $article->isBuyable(),
-                //'variant_keys'         => $article->getVariantKeys(),
-                'priceNet'             => money_format('%.2n', $article->getPrice()->getNettoPrice()),
-                'artnum'               => $article->oxarticles__oxartnum->value,
-                'url'                  => [$article->getLink()],
-                'soldAmount'          => $article->oxarticles__oxsoldamount->value,
-                'parentUid'            => $article->oxarticles__oxparentid->value,
-                'thumb'                => $article->getThumbnailUrl(),
-                'pictures'             => $articlePictures,
-                'pictureCount'       => count($articlePictures)
+                'productUid'            => $article->oxarticles__oxid->value,
+                'stock'                 => (int) $article->oxarticles__oxstock->value,
+                'price'                 => (float) money_format('%.2n', $article->getPrice()->getBruttoPrice()),
+                'vat'                   => $article->getArticleVat(),
+                'rating'                => $article->oxarticles__oxrating->value,
+                'active'                => (bool) $article->oxarticles__oxactive->value,
+                'hasVariants'           => (bool) $article->oxarticles__oxvarcount->value > 0 ? true : false,
+                'buyable'               => (bool) $article->isBuyable(),
+                'priceNet'              => (float) money_format('%.2n', $article->getPrice()->getNettoPrice()),
+                'artnum'                => $article->oxarticles__oxartnum->value,
+                'url'                   => [$article->getLink()],
+                'soldAmount'            => (int) $article->oxarticles__oxsoldamount->value,
+                'parentUid'             => $article->oxarticles__oxparentid->value,
+                'thumb'                 => $article->getThumbnailUrl(),
+                'pictures'              => $articlePictures,
+                'pictureCount'          => (int) count($articlePictures)
             ];
 
             // Multi language handling
