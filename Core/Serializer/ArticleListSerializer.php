@@ -85,7 +85,6 @@ class ArticleListSerializer extends BaseSerializer
             // Multi language handling
             $languages = Events::getActiveLanguages();
 
-
             foreach ($languages as $languageCode=>$language) {
                 if ($language['baseId'] !== 0) {
                     $article = oxNew(Article::class);
@@ -95,7 +94,7 @@ class ArticleListSerializer extends BaseSerializer
                 $serializedFields['title'][$languageCode] = $article->getTitle();
                 $serializedFields['fullDescription'][$languageCode] = $this->sanitizeDescription($article->getLongDesc());
                 $serializedFields['mainCategory'][$languageCode] = $this->getCategoryName($article);
-                $serializedFields['categories'][$languageCode] = $article->getCategoryIds(); // TODO: Change to names instead of ids
+                $serializedFields['categories'][$languageCode] = $article->getCategoryNames();
                 $serializedFields['manufacturer'][$languageCode] = $article->getManufacturer();
                 $serializedFields['vendor'][$languageCode] = $article->getVendor();
                 $serializedFields['shortDescription'][$languageCode] = $article->getCoreFieldInLanguage('oxshortdesc', $language['baseId']);

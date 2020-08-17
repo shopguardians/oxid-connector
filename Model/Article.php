@@ -36,6 +36,27 @@ class Article extends Article_parent
     }
 
     /**
+     * Returns name of assigned main category
+     *
+     * @return null|string
+     */
+    public function getCategoryNames()
+    {
+        $categoryIds = $this->getCategoryIds();
+
+        $names = [];
+
+        foreach ($categoryIds as $categoryId) {
+            $oCategory = oxNew(Category::class);
+            $oCategory->load($categoryId);
+            if ($oCategory instanceof Category) {
+                $names[] = $oCategory->getTitle();
+            }
+        }
+        return $names;
+    }
+
+    /**
      * Returns name of assigned manufacturer
      *
      * @return null|string
